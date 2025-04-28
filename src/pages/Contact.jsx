@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import "../assets/styles/contact.css";
+import emailjs from "@emailjs/browser";
 
 export default function Contact() {
+  const form = useRef();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -29,18 +31,30 @@ export default function Contact() {
       setLoading(true);
       setSuccessMessage("");
 
-      setTimeout(() => {
-        console.log("Form sent:", { email, message });
-        setLoading(false); // ✅ ვწყვეტთ ლოდინგს
-        setSuccessMessage("შეტყობინება წარმატებით გაიგზავნა ✅");
-        setEmail("");
-        setMessage("");
-        setTimeout(() => {
-          setSuccessMessage("");
-        }, 3000);
-
-
-      }, 2000);
+      emailjs
+        .sendForm(
+          "service_or73v95",
+          "template_dffqf45",
+          form.current,
+          "6aq9ar3cBe44qnoqn"
+        )
+        .then(
+          (result) => {
+            console.log(result.text);
+            setLoading(false);
+            setSuccessMessage("შეტყობინება წარმატებით გაიგზავნა ✅");
+            setEmail("");
+            setMessage("");
+            setTimeout(() => {
+              setSuccessMessage("");
+            }, 3000);
+          },
+          (error) => {
+            console.log(error.text);
+            setLoading(false);
+            setSuccessMessage("შეცდომა მოხდა, სცადეთ ხელახლა ❌");
+          }
+        );
     }
   };
 
@@ -59,8 +73,8 @@ export default function Contact() {
   };
   return (
     <section className="contact">
-      <form className="form" onSubmit={submit}>
-      {loading && <p className="loading-message">იტვირთება...</p>}
+      <form ref={form} className="form" onSubmit={submit}>
+        {loading && <p className="loading-message">იტვირთება...</p>}
         {successMessage && <p className="success-message">{successMessage}</p>}
         <div className="flex">
           {emailError && <p className="email-error">{emailError}</p>}
